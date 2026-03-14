@@ -1,0 +1,368 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>115學年 大華中學 新生入學學習評量</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- React & ReactDOM -->
+    <script src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+    <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+    <!-- Babel for JSX -->
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+    <!-- Lucide Icons -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700;900&display=swap');
+        body { font-family: 'Noto Sans TC', sans-serif; }
+        
+        .bubble-filled {
+            background-color: #000 !important;
+            color: transparent !important;
+            border-color: #000 !important;
+        }
+        
+        .input-focus:focus {
+            outline: none;
+            border-color: #ef4444;
+            box-shadow: 0 0 0 2px rgba(239, 68, 68, 0.1);
+        }
+
+        /* 針對 select 的樣式優化 */
+        select {
+            appearance: none;
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke='%23ef4444'%3E%3Cpath stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M19 9l-7 7-7-7'%3E%3C/path%3E%3C/svg%3E");
+            background-repeat: no-repeat;
+            background-position: right 0.5rem center;
+            background-size: 1.5em;
+        }
+    </style>
+</head>
+<body class="bg-slate-50">
+    <div id="root"></div>
+
+    <script type="text/babel">
+        const { useState, useEffect } = React;
+        
+        const Icon = ({ name, size = 24, className = "" }) => {
+            const [svg, setSvg] = React.useState("");
+            React.useEffect(() => {
+                const element = document.createElement('div');
+                const i = document.createElement('i');
+                i.setAttribute('data-lucide', name);
+                i.setAttribute('width', size);
+                i.setAttribute('height', size);
+                if(className) i.setAttribute('class', className);
+                element.appendChild(i);
+                lucide.createIcons({node: element});
+                setSvg(element.innerHTML);
+            }, [name, size, className]);
+            return <span className="inline-flex" dangerouslySetInnerHTML={{ __html: svg }} />;
+        };
+
+        const App = () => {
+            const [answers, setAnswers] = useState({});
+            const [infoBubbles, setInfoBubbles] = useState({});
+            
+            // 狀態管理
+            const [inputSubject, setInputSubject] = useState("");
+            const [inputClass, setInputClass] = useState("");
+            const [inputSeat, setInputSeat] = useState("");
+            const [inputName, setInputName] = useState("");
+
+            // 控制收合狀態
+            const [isMainContentOpen, setIsMainContentOpen] = useState(true);
+            const [isGuideOpen, setIsGuideOpen] = useState(true);
+            const [isSimulatorOpen, setIsSimulatorOpen] = useState(true);
+
+            const toggleAnswer = (questionId, option) => {
+                setAnswers(prev => {
+                    if (prev[questionId] === option) {
+                        const next = { ...prev };
+                        delete next[questionId];
+                        return next;
+                    }
+                    return { ...prev, [questionId]: option };
+                });
+            };
+
+            const toggleInfoBubble = (field, index, value) => {
+                const key = `${field}-${index}`;
+                setInfoBubbles(prev => {
+                    if (prev[key] === value) {
+                        const next = { ...prev };
+                        delete next[key];
+                        return next;
+                    }
+                    return { ...prev, [key]: value };
+                });
+            };
+
+            const evaluationSchedule = [
+                { time: '13:50 - 14:40', subject: '學習評量 (第一節)', subName: '數學', room: '各班考場' },
+                { time: '14:50 - 15:30', subject: '學習評量 (第二節)', subName: '英語', room: '各班考場' },
+                { time: '15:40 - 16:30', subject: '學習評量 (第三節)', subName: '國語', room: '各班考場' },
+            ];
+
+            return (
+                <div className="min-h-screen flex flex-col relative bg-slate-50">
+                    
+                    {/* Header */}
+                    <header className="bg-indigo-900 text-white shadow-lg relative z-10 border-b-4 border-indigo-950">
+                        <div className="max-w-6xl mx-auto px-6 py-8 md:py-10">
+                            <div className="flex flex-col items-center text-center space-y-3">
+                                <div className="flex items-center justify-center gap-2">
+                                    <p className="text-indigo-300 text-sm font-bold tracking-[0.2em] uppercase">桃園市私立大華高級中學資訊服務系統</p>
+                                </div>
+                                <h1 className="text-3xl md:text-5xl font-black tracking-widest drop-shadow-lg">
+                                    115 學年新生入學學習評量
+                                </h1>
+                                <div className="flex items-center justify-center gap-3 bg-indigo-950/50 px-4 py-2 rounded-full border border-indigo-800/50">
+                                    <span className="relative flex h-3 w-3">
+                                        <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
+                                        <span className="relative inline-flex rounded-full h-3 w-3 bg-emerald-500"></span>
+                                    </span>
+                                    <span className="text-xs md:text-sm font-black tracking-widest text-emerald-400 uppercase">系統連線中 - LIVE SYNC</span>
+                                </div>
+                            </div>
+                        </div>
+                    </header>
+
+                    <main className="max-w-6xl mx-auto px-4 py-6 space-y-8 flex-grow w-full relative z-10">
+                        
+                        <section className="bg-white rounded-[2rem] shadow-2xl border-4 border-red-500 overflow-hidden">
+                            {/* 標題與收放按鈕 */}
+                            <button 
+                                onClick={() => setIsMainContentOpen(!isMainContentOpen)}
+                                className="w-full bg-red-600 px-6 py-4 flex items-center justify-between text-white hover:bg-red-700 transition-colors"
+                            >
+                                <div className="flex items-center gap-3">
+                                    <Icon name="pen-tool" size={24} />
+                                    <h2 className="font-black text-xl md:text-2xl tracking-wider">答案卡填寫互動教學</h2>
+                                </div>
+                                <div className="flex items-center gap-2 bg-white/20 px-3 py-1 rounded-full text-sm font-bold">
+                                    {isMainContentOpen ? "收起內容" : "展開內容"}
+                                    <Icon name={isMainContentOpen ? "chevron-up" : "chevron-down"} size={20} />
+                                </div>
+                            </button>
+                            
+                            {isMainContentOpen && (
+                                <div className="p-4 md:p-8 space-y-6 animate-in fade-in slide-in-from-top-2 duration-300">
+                                    
+                                    {/* 基本資料輸入區 */}
+                                    <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4">
+                                        <div className="p-3 bg-white border-2 border-red-500 rounded-xl shadow-sm group">
+                                            <label className="text-[10px] font-black text-red-500 block mb-1 uppercase">科目 (請選擇)</label>
+                                            <select 
+                                                value={inputSubject}
+                                                onChange={(e) => setInputSubject(e.target.value)}
+                                                className="w-full bg-transparent font-black text-red-600 text-lg cursor-pointer input-focus"
+                                            >
+                                                <option value="" disabled>請選擇科目</option>
+                                                <option value="數學">數學</option>
+                                                <option value="英語">英語</option>
+                                                <option value="國語">國語</option>
+                                            </select>
+                                        </div>
+
+                                        <div className="p-3 bg-white border-2 border-red-500 rounded-xl shadow-sm">
+                                            <div className="flex justify-between items-center mb-1">
+                                                <label className="text-[10px] font-black text-red-500 block uppercase">班級</label>
+                                                <span className="text-[9px] font-bold text-slate-400 italic">（准考證第4、5碼）</span>
+                                            </div>
+                                            <input 
+                                                type="text" 
+                                                value={inputClass}
+                                                onChange={(e) => setInputClass(e.target.value)}
+                                                placeholder="輸入班級"
+                                                className="w-full bg-transparent font-black text-red-600 text-lg placeholder:text-red-200 input-focus"
+                                            />
+                                        </div>
+                                        <div className="p-3 bg-white border-2 border-red-500 rounded-xl shadow-sm">
+                                            <div className="flex justify-between items-center mb-1">
+                                                <label className="text-[10px] font-black text-red-500 block uppercase">座號</label>
+                                                <span className="text-[9px] font-bold text-slate-400 italic">（准考證第7、8碼）</span>
+                                            </div>
+                                            <input 
+                                                type="text" 
+                                                value={inputSeat}
+                                                onChange={(e) => setInputSeat(e.target.value)}
+                                                placeholder="輸入座號"
+                                                className="w-full bg-transparent font-black text-red-600 text-lg placeholder:text-red-200 input-focus"
+                                            />
+                                        </div>
+                                        <div className="p-3 bg-white border-2 border-red-500 rounded-xl shadow-sm">
+                                            <label className="text-[10px] font-black text-red-500 block mb-1 uppercase">考生姓名</label>
+                                            <input 
+                                                type="text" 
+                                                value={inputName}
+                                                onChange={(e) => setInputName(e.target.value)}
+                                                placeholder="輸入姓名"
+                                                className="w-full bg-transparent font-black text-red-600 text-lg placeholder:text-red-200 input-focus"
+                                            />
+                                        </div>
+                                    </div>
+
+                                    <div className="flex flex-col xl:flex-row gap-6">
+                                        {/* 文字說明區 */}
+                                        <div className="xl:w-1/3 space-y-4">
+                                            <div className="bg-slate-900 text-white rounded-[1.5rem] shadow-xl border-b-4 border-red-600 overflow-hidden">
+                                                <button 
+                                                    onClick={() => setIsGuideOpen(!isGuideOpen)}
+                                                    className="w-full p-5 flex items-center justify-between hover:bg-slate-800 transition-colors"
+                                                >
+                                                    <div className="flex items-center gap-3">
+                                                        <Icon name="clipboard-check" className="text-red-500" size={20} />
+                                                        <h4 className="font-black text-md tracking-widest">准考證填寫規範</h4>
+                                                    </div>
+                                                    <Icon name={isGuideOpen ? "chevron-up" : "chevron-down"} size={20} className="text-slate-500" />
+                                                </button>
+                                                
+                                                {isGuideOpen && (
+                                                    <div className="p-6 pt-0 space-y-4 border-t border-white/5 mt-2">
+                                                        <div className="flex items-start gap-3">
+                                                            <Icon name="check-circle-2" className="text-emerald-400 mt-1" size={18} />
+                                                            <p className="font-bold text-slate-300 text-sm leading-relaxed">
+                                                                正確劃記：將圓圈內 <span className="text-red-500 underline decoration-2 underline-offset-4">完整塗黑</span>。
+                                                            </p>
+                                                        </div>
+                                                        <div className="flex items-start gap-3">
+                                                            <Icon name="pencil" className="text-yellow-400 mt-1" size={18} />
+                                                            <p className="font-black text-yellow-400 text-sm leading-relaxed">
+                                                                筆具限制：限用 2B 鉛筆劃記。
+                                                            </p>
+                                                        </div>
+                                                    </div>
+                                                )}
+                                            </div>
+                                        </div>
+
+                                        {/* 模擬區 */}
+                                        <div className="flex-1 bg-slate-50 rounded-[1.5rem] border-2 border-slate-200 shadow-inner overflow-hidden">
+                                            <button 
+                                                onClick={() => setIsSimulatorOpen(!isSimulatorOpen)}
+                                                className="w-full p-5 flex items-center justify-between hover:bg-slate-100 transition-colors border-b border-slate-200"
+                                            >
+                                                <div className="flex items-center gap-2">
+                                                    <Icon name="layout" size={20} className="text-indigo-600" />
+                                                    <h5 className="text-lg font-black text-slate-800">模擬劃記區</h5>
+                                                </div>
+                                                <Icon name={isSimulatorOpen ? "chevron-up" : "chevron-down"} size={20} className="text-slate-400" />
+                                            </button>
+
+                                            {isSimulatorOpen && (
+                                                <div className="p-6 md:p-8 space-y-8 animate-in fade-in slide-in-from-top-2 duration-300">
+                                                    <div className="space-y-6">
+                                                        {['班級', '座號'].map(field => (
+                                                            <div key={field} className="space-y-3">
+                                                                <div className="flex items-center gap-2">
+                                                                    <div className="w-1 h-4 bg-red-500 rounded-full"></div>
+                                                                    <span className="text-md font-black text-slate-700">{field}</span>
+                                                                    <span className="text-[10px] font-bold text-slate-400 ml-1 italic">
+                                                                        {field === '班級' ? '(准考證第4、5碼)' : '(准考證第7、8碼)'}
+                                                                    </span>
+                                                                </div>
+                                                                <div className="flex flex-col gap-4 pl-2">
+                                                                    {[0, 1].map(idx => (
+                                                                        <div key={idx} className="flex flex-wrap items-center gap-2">
+                                                                            <span className="text-[10px] font-bold text-slate-400 w-10">第{idx+1}位</span>
+                                                                            <div className="flex flex-wrap gap-1.5">
+                                                                                {[...Array(10).keys()].map(num => (
+                                                                                    <button
+                                                                                        key={num}
+                                                                                        onClick={() => toggleInfoBubble(field, idx, num)}
+                                                                                        className={`w-8 h-8 rounded-full border-2 text-xs font-black transition-all flex items-center justify-center
+                                                                                            ${infoBubbles[`${field}-${idx}`] === num 
+                                                                                                ? 'bubble-filled' 
+                                                                                                : 'bg-white border-red-500 text-red-500 hover:bg-red-50'}`}
+                                                                                    >
+                                                                                        {num}
+                                                                                    </button>
+                                                                                ))}
+                                                                            </div>
+                                                                        </div>
+                                                                    ))}
+                                                                </div>
+                                                            </div>
+                                                        ))}
+                                                    </div>
+
+                                                    <div className="space-y-4 pt-6 border-t border-slate-200">
+                                                        <div className="flex items-center gap-2">
+                                                            <div className="w-1 h-4 bg-indigo-500 rounded-full"></div>
+                                                            <span className="text-md font-black text-slate-700">選擇題</span>
+                                                        </div>
+                                                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-8 gap-y-3">
+                                                            {[...Array(10).keys()].map(i => {
+                                                                const qNum = i + 1;
+                                                                return (
+                                                                    <div key={qNum} className="flex items-center gap-3 py-1.5 border-b border-slate-100">
+                                                                        <span className="w-5 font-black text-slate-300 text-[10px]">{String(qNum).padStart(2, '0')}</span>
+                                                                        <div className="flex gap-2">
+                                                                            {['A', 'B', 'C', 'D'].map(opt => (
+                                                                                <button
+                                                                                    key={opt}
+                                                                                    onClick={() => toggleAnswer(qNum, opt)}
+                                                                                    className={`w-8 h-8 rounded-full border-2 text-xs font-black transition-all flex items-center justify-center
+                                                                                        ${answers[qNum] === opt 
+                                                                                            ? 'bubble-filled' 
+                                                                                            : 'bg-white text-indigo-900 border-indigo-100 hover:border-indigo-400'}`}
+                                                                                >
+                                                                                    {opt}
+                                                                                </button>
+                                                                            ))}
+                                                                        </div>
+                                                                    </div>
+                                                                );
+                                                            })}
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            )}
+                                        </div>
+                                    </div>
+                                </div>
+                            )}
+                        </section>
+
+                        <div className="bg-white rounded-[2rem] shadow-xl border border-slate-200 overflow-hidden">
+                            <div className="bg-slate-800 px-6 py-4 text-white flex items-center gap-3">
+                                <Icon name="calendar" size={20} />
+                                <h3 className="text-lg font-black">當日評量流程</h3>
+                            </div>
+                            <div className="p-6 md:p-8">
+                                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                                    {evaluationSchedule.map((item, idx) => (
+                                        <div key={idx} className="flex flex-col gap-2 p-6 bg-slate-50 rounded-[1.5rem] border border-slate-100">
+                                            <div className="font-mono font-black text-xl text-indigo-600">{item.time}</div>
+                                            <div className="space-y-1">
+                                                <div className="font-black text-slate-800 text-sm">{item.subject}</div>
+                                                <span className="inline-block px-3 py-0.5 bg-red-100 text-red-600 rounded-full text-xs font-black">
+                                                    {item.subName}
+                                                </span>
+                                            </div>
+                                        </div>
+                                    ))}
+                                </div>
+                            </div>
+                        </div>
+                    </main>
+
+                    <footer className="bg-slate-900 py-8 text-center text-slate-500 border-t-4 border-indigo-950">
+                        <div className="max-w-4xl mx-auto px-4 space-y-2">
+                            <p className="font-black text-slate-300 text-md tracking-widest uppercase">桃園市私立大華高級中學 教務處</p>
+                            <p className="text-[10px] tracking-[0.3em] font-medium opacity-30">
+                                ★ 考試區域請保持安靜 ★
+                            </p>
+                        </div>
+                    </footer>
+                </div>
+            );
+        };
+
+        const root = ReactDOM.createRoot(document.getElementById('root'));
+        root.render(<App />);
+    </script>
+</body>
+</html>
